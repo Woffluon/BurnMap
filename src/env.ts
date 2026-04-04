@@ -19,6 +19,11 @@ export const env = createEnv({
       .default(300),
   },
   client: {
+    /**
+     * Mapbox access token.
+     * WARNING: Client-exposed tokens can be misused. Ensure you strict referrer 
+     * restrictions (domain whitelisting) on your Mapbox dashboard to prevent abuse.
+     */
     NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().min(1).optional(),
   },
   runtimeEnv: {

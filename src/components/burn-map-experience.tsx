@@ -1,13 +1,10 @@
 "use client";
 
 import type { FeatureCollection, Point } from "geojson";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useRef } from "react";
 
-import {
-  STORAGE_MAP_PROVIDER,
-  STORAGE_OFM_DISCLAIMER_ACK,
-  STORAGE_UI_THEME,
-} from "@/lib/burnmap-storage";
+import { useBurnMapState } from "./use-burn-map-state";
+import { STORAGE_OFM_DISCLAIMER_ACK } from "@/lib/burnmap-storage";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale, MapProviderChoice, UiTheme } from "@/lib/i18n/types";
 import type { EonetEvent } from "@/lib/nasa/eonet/schemas";
@@ -47,11 +44,26 @@ export function BurnMapExperience({
   loadFailed,
   days,
 }: BurnMapExperienceProps) {
-  const [uiTheme, setUiTheme] = useState<UiTheme>("dark");
-  const [mapProvider, setMapProvider] = useState<MapProviderChoice>(defaultMapProvider);
-  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
-  const [flyTo, setFlyTo] = useState<FlyToPayload | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const mapWrapperRef = useRef<HTMLDivElement>(null);
+  
+  const {
+    uiTheme,
+    mapProvider,
+    disclaimerOpen,
+    flyTo,
+    selectedId,
+    setDisclaimerOpen,
+    persistTheme,
+    requestProvider,
+    commitProvider,
+    handleDisclaimerConfirm,
+    handleDisclaimerDismiss,
+    handleIncidentActivate,
+  } = useBurnMapState({
+    defaultMapProvider,
+    hasMapboxToken,
+    locale,
+  });
 
   const count = events.length;
 
@@ -60,83 +72,6 @@ export function BurnMapExperience({
     const withDays = tpl.replace("{days}", String(days));
     return withDays.split("<<COUNT>>");
   }, [count, days, dictionary]);
-
-  /* eslint-disable react-hooks/set-state-in-effect -- one-time localStorage hydration after mount */
-  useEffect(() => {
-    const t = localStorage.getItem(STORAGE_UI_THEME);
-    if (t === "light" || t === "dark") {
-      setUiTheme(t);
-    }
-
-    const p = localStorage.getItem(STORAGE_MAP_PROVIDER);
-    if (p === "openfreemap") {
-      setMapProvider("openfreemap");
-    } else if (p === "mapbox" && hasMapboxToken) {
-      setMapProvider("mapbox");
-    } else {
-      setMapProvider(defaultMapProvider);
-    }
-  }, [defaultMapProvider, hasMapboxToken]);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  useEffect(() => {
-    document.documentElement.lang = locale === "tr" ? "tr" : "en";
-    document.documentElement.classList.toggle("dark", uiTheme === "dark");
-  }, [locale, uiTheme]);
-
-  const persistTheme = useCallback((t: UiTheme) => {
-    setUiTheme(t);
-    localStorage.setItem(STORAGE_UI_THEME, t);
-  }, []);
-
-  const commitProvider = useCallback(
-    (p: MapProviderChoice) => {
-      if (p === "mapbox" && !hasMapboxToken) {
-        setMapProvider("mapbox");
-        localStorage.setItem(STORAGE_MAP_PROVIDER, "mapbox");
-        return;
-      }
-      setMapProvider(p);
-      localStorage.setItem(STORAGE_MAP_PROVIDER, p);
-    },
-    [hasMapboxToken],
-  );
-
-  const requestProvider = useCallback(
-    (next: MapProviderChoice) => {
-      if (next === mapProvider) return;
-      if (next === "openfreemap") {
-        const ack = localStorage.getItem(STORAGE_OFM_DISCLAIMER_ACK);
-        if (!ack) {
-          setDisclaimerOpen(true);
-          return;
-        }
-      }
-      commitProvider(next);
-    },
-    [commitProvider, mapProvider],
-  );
-
-  const handleDisclaimerConfirm = useCallback(() => {
-    localStorage.setItem(STORAGE_OFM_DISCLAIMER_ACK, "1");
-    commitProvider("openfreemap");
-    setDisclaimerOpen(false);
-  }, [commitProvider]);
-
-  const handleDisclaimerDismiss = useCallback(() => {
-    setDisclaimerOpen(false);
-  }, []);
-
-  const handleIncidentActivate = useCallback((event: EonetEvent) => {
-    const pt = event.geometry.find((g) => g.type === "Point");
-    if (!pt || pt.type !== "Point") return;
-    setSelectedId(event.id);
-    setFlyTo({
-      lng: pt.coordinates[0],
-      lat: pt.coordinates[1],
-      nonce: Date.now(),
-    });
-  }, []);
 
   const shell = uiTheme === "dark" ? "bg-zinc-950 text-zinc-50" : "bg-zinc-100 text-zinc-900";
   const card = uiTheme === "dark"
@@ -161,9 +96,9 @@ export function BurnMapExperience({
       : "border-amber-600/40 bg-amber-100/90 text-amber-950";
 
   const toggleBtn = (active: boolean) =>
-    `rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+    `rounded-md px-4 py-3 sm:px-2.5 sm:py-1.5 text-sm sm:text-xs font-medium transition-colors min-h-[44px] sm:min-h-0 ${
       active
-        ? "bg-orange-500/25 text-orange-800 dark:text-orange-100"
+        ? "bg-orange-500/10 text-orange-900 dark:bg-orange-500/25 dark:text-orange-100"
         : "opacity-70 hover:bg-black/5 dark:hover:bg-white/10"
     }`;
 
@@ -176,7 +111,7 @@ export function BurnMapExperience({
         onDismiss={handleDisclaimerDismiss}
       />
 
-      <div className="mx-auto flex w-full max-w-[min(100%,1400px)] flex-1 flex-col gap-6 px-4 py-6 lg:gap-8 lg:px-8 lg:py-8">
+      <div className="mx-auto flex w-full max-w-[min(100%,1400px)] flex-1 flex-col gap-6 px-4 py-6 md:px-6 md:py-8 lg:gap-8 lg:px-8 lg:py-8">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-current/10 pb-4">
           <div className="flex flex-wrap items-center gap-1 rounded-lg border border-current/15 p-0.5" role="group" aria-label="Theme">
             <button
@@ -226,7 +161,7 @@ export function BurnMapExperience({
         ) : null}
 
         <div className="grid flex-1 grid-cols-1 gap-6 lg:min-h-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:items-stretch lg:gap-8">
-          <div className="flex min-h-0 flex-col">
+          <div className="flex min-h-0 flex-col" ref={mapWrapperRef} tabIndex={-1}>
             <WildfireMapDynamic
               provider={mapProvider}
               mapboxAccessToken={mapboxAccessToken}
@@ -266,7 +201,7 @@ export function BurnMapExperience({
             </div>
 
             <ul
-              className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1 lg:max-h-[var(--burnmap-map-height)]"
+              className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1 max-h-[50vh] lg:max-h-[var(--burnmap-map-height)]"
               aria-label={dictionary.incidentsListLabel}
             >
               {events.map((event) => {
@@ -281,8 +216,11 @@ export function BurnMapExperience({
                     <button
                       type="button"
                       disabled={!canFly}
-                      onClick={() => handleIncidentActivate(event)}
-                      className={`w-full rounded-lg border px-4 py-3 text-left transition-colors ${card} ${
+                      onClick={() => {
+                        handleIncidentActivate(event);
+                        mapWrapperRef.current?.focus();
+                      }}
+                      className={`w-full rounded-lg border px-4 py-3 text-left transition-colors min-h-[44px] ${card} ${
                         selectedId === event.id ? "ring-2 ring-orange-500/50" : ""
                       } ${!canFly ? "cursor-not-allowed opacity-60" : ""}`}
                     >
