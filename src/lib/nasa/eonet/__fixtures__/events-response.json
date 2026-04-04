@@ -1,0 +1,25 @@
+{
+  "title": "EONET Events",
+  "description": "Natural events from EONET.",
+  "link": "https://eonet.gsfc.nasa.gov/api/v3/events",
+  "events": [
+    {
+      "id": "EONET_TEST_1",
+      "title": "Test Wildfire",
+      "description": null,
+      "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_TEST_1",
+      "closed": null,
+      "categories": [{ "id": "wildfires", "title": "Wildfires" }],
+      "sources": [{ "id": "TEST", "url": "https://example.com/incident" }],
+      "geometry": [
+        {
+          "magnitudeValue": 100,
+          "magnitudeUnit": "acres",
+          "date": "2026-04-02T11:26:00Z",
+          "type": "Point",
+          "coordinates": [-92.6888328, 45.7153853]
+        }
+      ]
+    }
+  ]
+}
