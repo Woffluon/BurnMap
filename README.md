@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔥 Burnmap
+# Burnmap
 
 **Enterprise-Grade Real-Time Global Wildfire Monitoring**
 
