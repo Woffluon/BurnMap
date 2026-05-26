@@ -1,19 +1,37 @@
 import type { Dictionary } from "./types";
 
 export const tr: Dictionary = {
-  heroKicker: "NASA EONET · Canlı akış",
+  heroKicker: "NASA FIRMS · VIIRS NOAA-20 NRT",
   heroTitle: "BurnMap",
-  heroStatsTemplate:
-    "Son {days} günde <<COUNT>> açık orman yangını (küresel, EONET v3).",
-  heroStatsSingular:
-    "Son {days} günde <<COUNT>> açık orman yangını (küresel, EONET v3).",
-  eonetUnavailable:
-    "NASA EONET'e ulaşılamadı. Hizmet yeniden gelene kadar boş olay listesi gösteriliyor.",
-  emptyList: "Bu pencere için açık orman yangını bulunamadı.",
-  incidentsListLabel: "Orman yangını olayları",
-  areaMultiPoint: "Alan / çoklu nokta",
+  heroSubtitle:
+    "Son 24 saate ait küresel aktif yangın tespitleri, hızlı operasyonel tarama için düzenlendi.",
+  liveWindowLabel: "Pencere",
+  sourceLabel: "Kaynak",
+  sourceValue: "VIIRS NOAA-20 NRT",
+  detectionsLabel: "Tespit",
+  latestPassLabel: "Son geçiş",
+  highConfidenceLabel: "Yüksek güven",
+  frpLabel: "Toplam FRP",
+  peakFrpLabel: "Tepe FRP",
+  mapPanelTitle: "Aktif yangın alanı",
+  mapPanelSubtitle: "Kümelenmiş tespitler güvene ve FRP'ye göre çizilir.",
+  railTitle: "Tespit kuyruğu",
+  railSubtitle: "Önce en yeni kayıtlar, sonra en güçlü FRP.",
+  showingLimit: "Akış daha büyükse ilk 100 kayıt gösterilir.",
+  firmsUnavailable:
+    "NASA FIRMS'e ulaşılamadı. Hizmet yeniden gelene kadar boş tespit kümesi gösteriliyor.",
+  firmsKeyMissing:
+    "NASA_FIRMS_MAP_KEY yapılandırılmamış. Canlı tespitleri yüklemek için sunucuya FIRMS MAP_KEY ekleyin.",
+  emptyList: "Bu pencere için FIRMS tespiti bulunamadı.",
+  detectionsListLabel: "FIRMS yangın tespitleri",
+  confidenceHigh: "Yüksek",
+  confidenceNominal: "Nominal",
+  confidenceLow: "Düşük",
+  dayDetection: "Gündüz",
+  nightDetection: "Gece",
+  latestUnknown: "Henüz geçiş yok",
   mapAria:
-    "Yangın konumları haritası. Yakınlaştırmak için sıkıştırın veya kaydırın; kaydırmak için sürükleyin.",
+    "Aktif yangın tespit haritası. Yakınlaştırmak için sıkıştırın veya kaydırın; kaydırmak için sürükleyin.",
   mapLoading: "Harita yükleniyor",
   mapTokenMissingTitle: "Mapbox anahtarı yok",
   mapTokenMissingBody:

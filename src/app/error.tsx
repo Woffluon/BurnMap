@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 /**
- * Client error boundary for the `app` segment: surfaces EONET/network failures without a blank screen.
+ * Client error boundary for the `app` segment: surfaces FIRMS/network failures without a blank screen.
  */
 export default function Error({
   error,
@@ -23,7 +23,7 @@ export default function Error({
     >
       <h1 className="text-lg font-semibold">Something went wrong</h1>
       <p className="max-w-md text-sm text-zinc-400">
-        BurnMap could not load NASA EONET data. Check your connection and try again.
+        BurnMap could not load NASA FIRMS data. Check your connection and try again.
       </p>
       <button
         type="button"

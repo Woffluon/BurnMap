@@ -10,7 +10,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { UiTheme } from "@/lib/i18n/types";
 import { openFreeMapStyleForTheme } from "@/lib/map/styles";
-import type { WildfirePointProperties } from "@/lib/nasa/eonet/events-to-geojson";
+import type { FireDetectionPointProperties } from "@/lib/nasa/firms/detections-to-geojson";
 
 import type { FlyToPayload } from "./wildfire-map-mapbox";
 
@@ -49,8 +49,18 @@ function clusterLayersForTheme(theme: UiTheme): {
       type: "circle",
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-color": "rgba(249, 115, 22, 0.85)",
-        "circle-radius": 7,
+        "circle-color": [
+          "match",
+          ["get", "confidence"],
+          "h",
+          "#ef4444",
+          "n",
+          "#f97316",
+          "l",
+          "#f59e0b",
+          "#f97316",
+        ],
+        "circle-radius": ["interpolate", ["linear"], ["get", "frp"], 0, 5, 25, 7, 100, 11],
         "circle-stroke-width": 1.5,
         "circle-stroke-color": "#ffedd5",
       },
@@ -59,7 +69,7 @@ function clusterLayersForTheme(theme: UiTheme): {
 }
 
 export type WildfireMapLibreProps = {
-  geojson: FeatureCollection<Point, WildfirePointProperties>;
+  geojson: FeatureCollection<Point, FireDetectionPointProperties>;
   bounds: [[number, number], [number, number]] | null;
   uiTheme: UiTheme;
   flyTo: FlyToPayload | null;

@@ -1,118 +1,98 @@
-<div align="center">
+# BurnMap
 
-# Burnmap
+Dark, responsive active-fire monitoring console powered by NASA FIRMS.
 
-**Enterprise-Grade Real-Time Global Wildfire Monitoring**
+BurnMap visualizes global NASA FIRMS `VIIRS_NOAA20_NRT` detections from the last 24 hours. The app keeps data fetching on the server, validates FIRMS CSV rows with Zod, converts detections to clustered GeoJSON, and renders the map with either Mapbox or OpenFreeMap/MapLibre.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.2-blue?style=flat-square&logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![Zod](https://img.shields.io/badge/Zod-Schema_Validation-3068b7?style=flat-square)](https://zod.dev/)
-[![Vitest](https://img.shields.io/badge/Vitest-Testing-FCC72C?style=flat-square&logo=vitest)](https://vitest.dev/)
+## Stack
 
-Burnmap is a high-performance, production-ready web application built to visualize active wildfires globally using real-time data from the NASA EONET (Earth Observatory Natural Event Tracker) API. Developed with stringent Next.js App Router patterns, strictly-typed TypeScript, and modern React 19 server/client composition.
+- Next.js App Router
+- React 19
+- TypeScript strict mode
+- Tailwind CSS v4
+- Zod
+- Mapbox GL / MapLibre GL via `react-map-gl`
+- Vitest
+- pnpm
 
-</div>
-
----
-
-## 🏗 Architecture & Engineering Principles
-
-This project adheres to top-tier frontend architecture principles, balancing maximum server performance with dynamic client interactivity.
-
-- **React Server Components (RSC) First:** Core data fetching (NASA API), geographic data transformation (GeoJSON), and i18n dictionaries are entirely computed on the server. Zero unnecessary JavaScript is sent to the client.
-- **Client-Side Optimization & Lazy Loading:** Map engines (`mapbox-gl` and `maplibre-gl`/OpenFreeMap) are strictly heavy dependencies. They are dynamically imported with `next/dynamic` and code-split so the user's browser only downloads the specific mapping engine currently active.
-- **Strictly Typed API Contracts:** NASA API responses are parsed and validated strictly at the network boundary using **Zod**. Network or schema validation failures gracefully cascade to resilient error boundaries and safe fallbacks without breaking the UI.
-- **Agnostic Map Engine Abstraction:** Implements a dual-map engine architecture supporting commercial **Mapbox** and community-maintained **OpenFreeMap** (MapLibre), easily toggled via abstract map provider wrappers.
-- **Isomorphic i18n:** Clean localization architecture supporting both English and Turkish, utilizing dictionaries completely injected from the RSC layer—meaning translations have a zero-byte overhead on the main client bundle.
-
-## ✨ Core Features
-
-- 🌍 **NASA EONET Integration:** Live geospatial fetching using standard `fetch` with App Router caching semantics (`revalidate`).
-- 🗺️ **Dual Rendering Geovisualization:** Switch on the fly between Mapbox and OpenFreeMap. Incorporates Fly-To interactions from a fully responsive sidebar list.
-- 🌓 **Persistent End-User Preferences:** Dark/Light themes, Map Providers, and Modals persist cleanly utilizing a custom local storage hook model. 
-- ♿ **Strict Accessibility (a11y):** ARIA tags, polite live regions for map load states, keyboard-navigable incident lists, and strict semantic HTML wrapping.
-- ⚡ **Tailwind v4 Styling:** Modern, highly scalable utility-class styling focusing on fluid layouts without layout shifts during dynamic loading phases (`<Suspense>` fallback skeletons).
-
-## 🗂️ Project Structure
-
-An elite engineering structure designed for scalability and clear separation of concerns:
+## Architecture
 
 ```plaintext
 src/
-├── app/               # Next.js 15+ App Router entrypoints (RSC heavily utilized)
-│   ├── page.tsx       # Streaming data ingestion & SSR rendering
-│   ├── layout.tsx     # Root layout & global CSS wrappers
-│   ├── loading.tsx    # Suspense fallback strategies for layout shift prevention
-│   └── error.tsx      # Graceful Next.js error boundaries
-├── components/        # Isolated, composable UI pieces
-│   ├── map/           # Code-split dynamic map components (Mapbox / Libre engines)
-│   └── ...            # Shell, i18n switcher, and modal elements
-├── lib/               # Pure business logic and domain entities
-│   ├── i18n/          # Zero-byte runtime translation dictionaries
-│   ├── map/           # Core map utilities
-│   └── nasa/          # API abstraction layer
-│       └── eonet/     # Strictly-typed data access objects and Zod schemas
-└── env.ts             # T3 Env style rigorous environment variable validation
+├── app/                  # App Router entrypoints, layout, loading and error UI
+├── components/           # Operator dashboard shell, controls, modal and map wrappers
+│   └── map/              # Code-split Mapbox / MapLibre renderers
+├── lib/
+│   ├── i18n/             # English/Turkish dictionaries
+│   ├── map/              # Basemap style helpers
+│   └── nasa/
+│       └── firms/        # FIRMS CSV fetch, schema, summary and GeoJSON logic
+└── env.ts                # Environment validation
 ```
 
-## 🛠️ Local Development & Setup
+## NASA FIRMS
 
-### Prerequisites
+The default feed is:
 
-Ensure you have **Node.js (>=20)** and a package manager (npm, yarn, pnpm, bun) installed.
+```plaintext
+https://firms.modaps.eosdis.nasa.gov/api/area/csv/[MAP_KEY]/VIIRS_NOAA20_NRT/world/1
+```
 
-### 1. Installation
+`MAP_KEY` is required by NASA FIRMS and must stay server-side. The app reads it from `NASA_FIRMS_MAP_KEY`.
 
-Clone the repository and install all dependencies:
+## Local Development
+
+Prerequisites:
+
+- Node.js 20+
+- pnpm 10.33.0+
+- NASA FIRMS MAP_KEY
+
+Install dependencies:
 
 ```bash
-git clone <repository-url>
-cd burnmap
-npm install
+pnpm install
 ```
 
-### 2. Environment Variables
-
-We enforce environment variable safety at build and runtime. Copy the template to `.env.local`:
+Create local env:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Populate `.env.local` to fit your setup:
-- `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` (optional): Required to enable the premium Mapbox layer. If omitted, the engine safely degrades solely to OpenFreeMap.
-
-### 3. Running the Server
-
-Start the Next.js development server with hot-module replacement (HMR):
+Set at least:
 
 ```bash
-npm run dev
+NASA_FIRMS_MAP_KEY=your_firms_map_key_here
 ```
 
-The application will be accessible at [http://localhost:3000](http://localhost:3000).
-
-## 🧪 Testing Strategy
-
-To ensure zero regressions across map logic and schema hydration, the project incorporates **Vitest** for uncompromised unit testing. Tests validate boundary outputs of the pure functions and API adapters.
+Optional Mapbox support:
 
 ```bash
-# Execute test suite
-npm run test
-
-# Run tests in watch mode
-npm run test:watch
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
 ```
 
-## 🛡️ Best Practices Utilized
+Run dev server:
 
-- **No `any` usage:** Fully strict TypeScript configurations.
-- **Data Encapsulation:** Fetch logic is decoupled from UI presentation (e.g., `fetchEonetEvents` acts as a pure, testable API service layer).
-- **Graceful Degradation:** If NASA servers are slow or unreachable, static fallbacks and error handling ensure that rendering continues smoothly.
-- **Bundle Diet:** Unused components are systematically eliminated via precise `import` paths and dynamic module loading.
+```bash
+pnpm dev
+```
 
-## 📄 License
+Open [http://localhost:3000](http://localhost:3000).
 
-This project is open-source and licensed under the **MIT License**.
+## Scripts
+
+```bash
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm test
+pnpm test:watch
+```
+
+## Notes
+
+- If `NASA_FIRMS_MAP_KEY` is missing, the app still renders and shows a configuration warning.
+- FIRMS global VIIRS queries can return tens of thousands of detections per day. The app uses uncached server fetches because the CSV can exceed Next.js data-cache limits; the map receives all points while the side queue displays the top 100 sorted by recency and FRP.
+- OpenFreeMap is available without a key, but it is a third-party tile service with no uptime guarantee.

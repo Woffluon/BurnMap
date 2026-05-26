@@ -7,16 +7,11 @@ import { z } from "zod";
  */
 export const env = createEnv({
   server: {
-    EONET_API_BASE_URL: z
+    NASA_FIRMS_MAP_KEY: z.string().min(1).optional(),
+    FIRMS_API_BASE_URL: z
       .string()
       .url()
-      .default("https://eonet.gsfc.nasa.gov/api/v3"),
-    EONET_FETCH_REVALIDATE_SECONDS: z.coerce
-      .number()
-      .int()
-      .positive()
-      .max(86_400)
-      .default(300),
+      .default("https://firms.modaps.eosdis.nasa.gov"),
   },
   client: {
     /**
@@ -27,8 +22,8 @@ export const env = createEnv({
     NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().min(1).optional(),
   },
   runtimeEnv: {
-    EONET_API_BASE_URL: process.env.EONET_API_BASE_URL,
-    EONET_FETCH_REVALIDATE_SECONDS: process.env.EONET_FETCH_REVALIDATE_SECONDS,
+    NASA_FIRMS_MAP_KEY: process.env.NASA_FIRMS_MAP_KEY,
+    FIRMS_API_BASE_URL: process.env.FIRMS_API_BASE_URL,
     NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
   },
   emptyStringAsUndefined: true,

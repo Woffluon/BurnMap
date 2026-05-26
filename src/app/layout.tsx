@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BurnMap · NASA wildfire tracking",
-  description: "Interactive wildfire detection and tracking powered by NASA EONET.",
+  title: "BurnMap · NASA FIRMS fire detection",
+  description: "Interactive active-fire detection console powered by NASA FIRMS.",
 };
 
 export const viewport: Viewport = {

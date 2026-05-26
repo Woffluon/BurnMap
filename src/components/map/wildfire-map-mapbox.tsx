@@ -10,7 +10,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { UiTheme } from "@/lib/i18n/types";
 import { mapboxStyleForTheme } from "@/lib/map/styles";
-import type { WildfirePointProperties } from "@/lib/nasa/eonet/events-to-geojson";
+import type { FireDetectionPointProperties } from "@/lib/nasa/firms/detections-to-geojson";
 
 function clusterLayersForTheme(theme: UiTheme): {
   clusterLayer: Omit<CircleLayerSpecification, "source">;
@@ -47,8 +47,18 @@ function clusterLayersForTheme(theme: UiTheme): {
       type: "circle",
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-color": "rgba(249, 115, 22, 0.85)",
-        "circle-radius": 7,
+        "circle-color": [
+          "match",
+          ["get", "confidence"],
+          "h",
+          "#ef4444",
+          "n",
+          "#f97316",
+          "l",
+          "#f59e0b",
+          "#f97316",
+        ],
+        "circle-radius": ["interpolate", ["linear"], ["get", "frp"], 0, 5, 25, 7, 100, 11],
         "circle-stroke-width": 1.5,
         "circle-stroke-color": "#ffedd5",
       },
@@ -60,7 +70,7 @@ export type FlyToPayload = { lng: number; lat: number; nonce: number };
 
 export type WildfireMapMapboxProps = {
   mapboxAccessToken: string;
-  geojson: FeatureCollection<Point, WildfirePointProperties>;
+  geojson: FeatureCollection<Point, FireDetectionPointProperties>;
   bounds: [[number, number], [number, number]] | null;
   uiTheme: UiTheme;
   flyTo: FlyToPayload | null;
@@ -145,6 +155,7 @@ export function WildfireMapMapbox({
         ref={mapRef}
         mapboxAccessToken={mapboxAccessToken}
         mapStyle={mapStyle}
+        projection="mercator"
         initialViewState={initialViewState}
         style={{ width: "100%", height: "100%" }}
         reuseMaps

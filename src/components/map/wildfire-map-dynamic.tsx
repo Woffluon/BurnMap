@@ -5,7 +5,7 @@ import type { FeatureCollection, Point } from "geojson";
 
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { MapProviderChoice, UiTheme } from "@/lib/i18n/types";
-import type { WildfirePointProperties } from "@/lib/nasa/eonet/events-to-geojson";
+import type { FireDetectionPointProperties } from "@/lib/nasa/firms/detections-to-geojson";
 
 import type { FlyToPayload } from "./wildfire-map-mapbox";
 
@@ -42,7 +42,7 @@ const WildfireMapLibre = dynamic(
 export type WildfireMapDynamicProps = {
   provider: MapProviderChoice;
   mapboxAccessToken: string;
-  geojson: FeatureCollection<Point, WildfirePointProperties>;
+  geojson: FeatureCollection<Point, FireDetectionPointProperties>;
   bounds: [[number, number], [number, number]] | null;
   uiTheme: UiTheme;
   flyTo: FlyToPayload | null;

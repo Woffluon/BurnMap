@@ -9,18 +9,34 @@ export type UiTheme = "light" | "dark";
 
 /**
  * Serializable strings passed from the server (RSC) into {@link BurnMapExperience}.
- * Template tokens: `{count}`, `{days}` in `heroStatsTemplate`.
  */
 export type Dictionary = {
   heroKicker: string;
   heroTitle: string;
-  /** Use `<<COUNT>>`, `{days}` — `<<COUNT>>` splits layout for styled number. */
-  heroStatsTemplate: string;
-  heroStatsSingular: string;
-  eonetUnavailable: string;
+  heroSubtitle: string;
+  liveWindowLabel: string;
+  sourceLabel: string;
+  sourceValue: string;
+  detectionsLabel: string;
+  latestPassLabel: string;
+  highConfidenceLabel: string;
+  frpLabel: string;
+  peakFrpLabel: string;
+  mapPanelTitle: string;
+  mapPanelSubtitle: string;
+  railTitle: string;
+  railSubtitle: string;
+  showingLimit: string;
+  firmsUnavailable: string;
+  firmsKeyMissing: string;
   emptyList: string;
-  incidentsListLabel: string;
-  areaMultiPoint: string;
+  detectionsListLabel: string;
+  confidenceHigh: string;
+  confidenceNominal: string;
+  confidenceLow: string;
+  dayDetection: string;
+  nightDetection: string;
+  latestUnknown: string;
   mapAria: string;
   mapLoading: string;
   mapTokenMissingTitle: string;

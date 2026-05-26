@@ -6,7 +6,8 @@ import {
   STORAGE_UI_THEME,
 } from "@/lib/burnmap-storage";
 import type { MapProviderChoice, UiTheme } from "@/lib/i18n/types";
-import type { EonetEvent } from "@/lib/nasa/eonet/schemas";
+import { detectionId } from "@/lib/nasa/firms/detections-to-geojson";
+import type { FirmsDetection } from "@/lib/nasa/firms/schemas";
 import type { FlyToPayload } from "@/components/map/wildfire-map-mapbox";
 
 export type UseBurnMapStateProps = {
@@ -26,7 +27,6 @@ export function useBurnMapState({
   const [flyTo, setFlyTo] = useState<FlyToPayload | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  /* eslint-disable react-hooks/set-state-in-effect -- one-time localStorage hydration after mount */
   useEffect(() => {
     const t = localStorage.getItem(STORAGE_UI_THEME);
     if (t === "light" || t === "dark") {
@@ -42,8 +42,6 @@ export function useBurnMapState({
       setMapProvider(defaultMapProvider);
     }
   }, [defaultMapProvider, hasMapboxToken]);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
   useEffect(() => {
     document.documentElement.lang = locale === "tr" ? "tr" : "en";
     document.documentElement.classList.toggle("dark", uiTheme === "dark");
@@ -92,13 +90,11 @@ export function useBurnMapState({
     setDisclaimerOpen(false);
   }, []);
 
-  const handleIncidentActivate = useCallback((event: EonetEvent) => {
-    const pt = event.geometry.find((g) => g.type === "Point");
-    if (!pt || pt.type !== "Point") return;
-    setSelectedId(event.id);
+  const handleDetectionActivate = useCallback((detection: FirmsDetection) => {
+    setSelectedId(detectionId(detection));
     setFlyTo({
-      lng: pt.coordinates[0],
-      lat: pt.coordinates[1],
+      lng: detection.longitude,
+      lat: detection.latitude,
       nonce: Date.now(),
     });
   }, []);
@@ -115,6 +111,6 @@ export function useBurnMapState({
     commitProvider,
     handleDisclaimerConfirm,
     handleDisclaimerDismiss,
-    handleIncidentActivate,
+    handleDetectionActivate,
   };
 }
